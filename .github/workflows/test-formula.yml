@@ -33,14 +33,53 @@ jobs:
             echo "Formula/millyagent.rb is not published yet; skipping formula checks."
           fi
 
+      - name: Tap checked-out formula
+        if: steps.formula.outputs.present == 'true'
+        run: brew tap millychat-ai/millyagent "$GITHUB_WORKSPACE"
+
       - name: Check Ruby syntax
         if: steps.formula.outputs.present == 'true'
         run: ruby -c Formula/millyagent.rb
 
       - name: Check Homebrew style
         if: steps.formula.outputs.present == 'true'
-        run: brew style Formula/millyagent.rb
+        # The published prebuilt-binary Formula intentionally has no test do
+        # block; keep the Formula bytes stable and exclude only that cop.
+        run: brew style --except-cops=FormulaAudit/Test Formula/millyagent.rb
 
       - name: Audit formula
         if: steps.formula.outputs.present == 'true'
-        run: brew audit --new-formula Formula/millyagent.rb
+        # Homebrew 7 uses --new (not the removed --new-formula option).
+        run: brew audit --new --except-cops=FormulaAudit/Test millychat-ai/millyagent/millyagent
+
+      - name: Fetch public release asset
+        if: steps.formula.outputs.present == 'true'
+        run: brew fetch --force --formula millychat-ai/millyagent/millyagent
+
+      - name: Install and verify formula
+        if: steps.formula.outputs.present == 'true'
+        run: |
+          set -euo pipefail
+          brew install --formula millychat-ai/millyagent/millyagent
+          brew list --versions millyagent | grep -Fx 'millyagent 0.22.3'
+          test "$(millyagent --version)" = 'millyagent 0.22.3'
+          millyagent setup --help | grep -F -- '--non-interactive'
+          brew ruby -e '
+            formula = Formula["millychat-ai/millyagent/millyagent"]
+            service = formula.service
+            data = service.to_hash
+            abort "unexpected service command" unless data[:run] == [formula.opt_bin / "millyagent", "serve"]
+            abort "unexpected service environment" unless data[:environment_variables] == {
+              MILLYAGENT_HOME: "#{Dir.home}/.millyagent",
+              MILLYAGENT_SCOPE: "user",
+            }
+            abort "service is not keep-alive" unless service.keep_alive == { always: true }
+            abort "service is not run-at-load" unless service.run_at_load
+          '
+
+      - name: Remove formula and local tap
+        if: always() && steps.formula.outputs.present == 'true'
+        run: |
+          brew uninstall --formula millyagent || true
+          brew untap millychat-ai/millyagent || true
+          test ! -e "$(brew --prefix)/bin/millyagent"
