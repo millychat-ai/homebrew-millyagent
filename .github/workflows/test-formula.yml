@@ -53,8 +53,9 @@ jobs:
 
       - name: Audit formula
         if: steps.formula.outputs.present == 'true'
-        # Homebrew 7 uses --new (not the removed --new-formula option).
-        run: brew audit --new --except-cops=FormulaAudit/Test millychat-ai/millyagent/millyagent
+        # Style runs separately above; --new always enables strict style cops,
+        # including the intentional no-test warning for this prebuilt binary.
+        run: brew audit --new --skip-style millychat-ai/millyagent/millyagent
 
       - name: Fetch public release asset
         if: steps.formula.outputs.present == 'true'
