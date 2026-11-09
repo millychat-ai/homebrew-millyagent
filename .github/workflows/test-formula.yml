@@ -37,6 +37,10 @@ jobs:
         if: steps.formula.outputs.present == 'true'
         run: brew tap millychat-ai/millyagent "$GITHUB_WORKSPACE"
 
+      - name: Trust checked-out formula
+        if: steps.formula.outputs.present == 'true'
+        run: brew trust --formula millychat-ai/millyagent/millyagent
+
       - name: Check Ruby syntax
         if: steps.formula.outputs.present == 'true'
         run: ruby -c Formula/millyagent.rb
