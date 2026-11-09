@@ -1,0 +1,46 @@
+name: Test formula
+
+on:
+  push:
+    paths:
+      - "Formula/**/*.rb"
+      - ".github/workflows/test-formula.yml"
+  pull_request:
+    paths:
+      - "Formula/**/*.rb"
+      - ".github/workflows/test-formula.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  formula:
+    # The path filters avoid normal runs until a formula is added. Keep a
+    # manual dispatch harmless as well, so bootstrap commits stay green.
+    runs-on: macos-latest
+    steps:
+      - name: Check out tap
+        uses: actions/checkout@v4
+
+      - name: Detect generated formula
+        id: formula
+        run: |
+          if [ -f Formula/millyagent.rb ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "Formula/millyagent.rb is not published yet; skipping formula checks."
+          fi
+
+      - name: Check Ruby syntax
+        if: steps.formula.outputs.present == 'true'
+        run: ruby -c Formula/millyagent.rb
+
+      - name: Check Homebrew style
+        if: steps.formula.outputs.present == 'true'
+        run: brew style Formula/millyagent.rb
+
+      - name: Audit formula
+        if: steps.formula.outputs.present == 'true'
+        run: brew audit --new-formula Formula/millyagent.rb
