@@ -66,8 +66,8 @@ jobs:
         run: |
           set -euo pipefail
           brew install --formula millychat-ai/millyagent/millyagent
-          brew list --versions millyagent | grep -Fx 'millyagent 0.22.4'
-          test "$(millyagent --version)" = 'millyagent 0.22.4'
+          brew list --versions millyagent | grep -Fx 'millyagent 0.22.5'
+          test "$(millyagent --version)" = 'millyagent 0.22.5'
           millyagent setup --help | grep -F -- '--non-interactive'
           brew ruby -e '
             formula = Formula["millychat-ai/millyagent/millyagent"]

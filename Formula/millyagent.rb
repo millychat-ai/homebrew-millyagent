@@ -4,21 +4,21 @@
 class Millyagent < Formula
   desc "Local agent for millychat MCP tools"
   homepage "https://millychat.com"
-  version "0.22.4"
+  version "0.22.5"
   license "Apache-2.0"
   if OS.mac? && Hardware::CPU.arm?
-    url "https://millychat.com/downloads/millyagent/0.22.4/millyagent-0.22.4-macos-arm64", using: :nounzip
-    sha256 "436a5cc543de88203e03098c17dc91572e40bef7c25337812b24266655574256"
+    url "https://millychat.com/downloads/millyagent/0.22.5/millyagent-0.22.5-macos-arm64", using: :nounzip
+    sha256 "a8dbe87ea0d1b3077f1731cbd8f4ffd9502d061beaa64d3ef9b75c03df253d64"
   elsif OS.mac? && Hardware::CPU.intel?
-    url "https://millychat.com/downloads/millyagent/0.22.4/millyagent-0.22.4-macos-x64", using: :nounzip
-    sha256 "39001247c2b032fd1e95814a579a841a60602cbc96a8f1521b4cf1bc005b10ad"
+    url "https://millychat.com/downloads/millyagent/0.22.5/millyagent-0.22.5-macos-x64", using: :nounzip
+    sha256 "f8ae64b2cf6209ef235d1ceb58697c0d5d2d88ada015a00a6b8c353afb587cca"
   end
 
   def install
     if Hardware::CPU.arm?
-      bin.install "millyagent-0.22.4-macos-arm64" => "millyagent"
+      bin.install "millyagent-0.22.5-macos-arm64" => "millyagent"
     else
-      bin.install "millyagent-0.22.4-macos-x64" => "millyagent"
+      bin.install "millyagent-0.22.5-macos-x64" => "millyagent"
     end
   end
 
